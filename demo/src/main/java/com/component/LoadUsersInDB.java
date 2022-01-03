@@ -3,11 +3,13 @@ package com.component;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.model.User;
@@ -19,6 +21,8 @@ public class LoadUsersInDB implements CommandLineRunner{
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired PasswordEncoder passwordEncoder;
 	
 	@Override
 	public void run(String... args) throws Exception {
@@ -35,6 +39,13 @@ public class LoadUsersInDB implements CommandLineRunner{
 		User user10 = new User("BSJ",UUID.randomUUID().toString(), "Brian", "Canavan", "United States", 29);
 		
 		List<User> usersList = Arrays.asList(user1, user2, user3, user4, user5, user6, user7, user8, user9, user10);
+		
+		usersList = usersList.stream().map(user -> {
+			
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+			return user;
+		}).collect(Collectors.toList());
+		
 		userRepository.saveAll(usersList);
 	}
 	
